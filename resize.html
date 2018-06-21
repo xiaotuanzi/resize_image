@@ -1,0 +1,80 @@
+<html>
+<body>
+<script>
+  // 画像をファイルから読み込んで表示する
+  function load_image(input) {
+    let originalImage = document.getElementById('originalImage');
+
+    // 表示後の処理
+    originalImage.addEventListener('load', () => {
+      let resized_image = resize_image(originalImage); // 画像をリサイズする
+      load_resized_image(resized_image); // リサイズした画像を表示する
+    });
+
+    // ファイルを読み込んで表示する
+    let file = input.files[0];
+    let reader = new FileReader();
+    reader.onload = (event) => { originalImage.src = reader.result };
+    reader.readAsDataURL(file);
+  }
+
+  // 画像をリサイズする
+  function resize_image(originalImage) {
+    const LongEdgeLength = 300;
+
+    // 縦横比
+    let aspectRatio = originalImage.width / originalImage.height;
+
+    // リサイズ後のサイズを決める (ここでは縦横半分にしている)
+    let targetWidth, targetHeight;
+    if (aspectRatio < 1.0) {
+      // 縦長
+      targetWidth = LongEdgeLength * aspectRatio;
+      targetHeight = LongEdgeLength;
+    } else {
+      // 横長
+      targetWidth = LongEdgeLength;
+      targetHeight = LongEdgeLength / aspectRatio;
+    }
+
+    
+    // 変換に使うキャンバスを用意する
+    let canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    // Canvasをつかってリサイズする
+    let context = canvas.getContext('2d');
+    context.drawImage(
+      originalImage, 
+      0, 0, originalImage.width, originalImage.height, 
+      0, 0, targetWidth, targetHeight
+    );
+
+    // リサイズした画像のキャンバスを返す
+    return canvas;
+  }
+
+  // リサイズしたデータを表示する
+  function load_resized_image(canvas) {
+    let resizedImage = document.getElementById('resizedImage');
+    resizedImage.src = canvas.toDataURL('image/jpeg');
+  }
+</script>
+
+<p>
+  <!-- 画像ファイルの選択 -->
+  <input id="file" type="file" accept="image/*" onchange="load_image(this)" />
+</p>
+
+<p>
+  resized:<br/>
+  <image id="resizedImage"/>
+</p>
+
+<p>
+  original:<br/>
+  <image id="originalImage"/>
+</p>
+</body>
+</html>
